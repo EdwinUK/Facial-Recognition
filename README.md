@@ -1,5 +1,5 @@
 # Facial-Recognition
-This facial recognition application will be able to detect faces, verify whether it's a real user or a spoof attack and then recognise the face if it's in the database. The application is my final year project for university.
+This facial recognition application is my final year project for university, it will be able to detect faces, verify whether they're a real user or a spoof attack and then recognise them if they're in the database.
  
  ## Programmer
  - Edwin Rad
