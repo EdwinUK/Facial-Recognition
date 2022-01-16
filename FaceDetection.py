@@ -4,9 +4,12 @@ import cv2
 # Storing the MTCNN function and the capture device
 face_detector = MTCNN()
 capture = cv2.VideoCapture(0)
+face_image_path = "C:/Users/Edwin/OneDrive - University of Greenwich/Year 3/Final Year " \
+                  "Project/Programming/Facial-Recognition/cropped_faces "
 
 
 def face_detection():
+    crop_counter = 0
     while True:
         # Capture each frame
         __, frame = capture.read()
@@ -17,25 +20,36 @@ def face_detection():
             for person in result:
                 # Store the location of the box and key points
                 bounding_box = person['box']
-                landmarks = person['keypoints']
+                # landmarks = person['keypoints']
 
-                # Create a bounding box around the face
-                cv2.rectangle(frame,
-                              (bounding_box[0], bounding_box[1]),
-                              (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]),
-                              (204, 51, 255),
-                              2)
+                # # Draw a bounding box around the face
+                # cv2.rectangle(frame,
+                #               (bounding_box[0], bounding_box[1]),
+                #               (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]),
+                #               (204, 51, 255),
+                #               2)
+                #
+                # # Draw circles around facial landmarks
+                # cv2.circle(frame, (landmarks['left_eye']), 2, (0, 255, 0), 2)
+                # cv2.circle(frame, (landmarks['right_eye']), 2, (0, 255, 0), 2)
+                # cv2.circle(frame, (landmarks['nose']), 2, (0, 255, 0), 2)
+                # cv2.circle(frame, (landmarks['mouth_left']), 2, (0, 255, 0), 2)
+                # cv2.circle(frame, (landmarks['mouth_right']), 2, (0, 255, 0), 2)
 
-                # Create circles around facial landmarks
-                cv2.circle(frame, (landmarks['left_eye']), 2, (0, 255, 0), 2)
-                cv2.circle(frame, (landmarks['right_eye']), 2, (0, 255, 0), 2)
-                cv2.circle(frame, (landmarks['nose']), 2, (0, 255, 0), 2)
-                cv2.circle(frame, (landmarks['mouth_left']), 2, (0, 255, 0), 2)
-                cv2.circle(frame, (landmarks['mouth_right']), 2, (0, 255, 0), 2)
+                # Slice and store the image to only include the ROI
+                roi_cropped = frame[int(bounding_box[1]):
+                                    int(bounding_box[1] + bounding_box[3]),
+                                    int(bounding_box[0]):
+                                    int(bounding_box[0] + bounding_box[2])]
+
+                # Display a window showing the cropped face and save to file
+                cv2.imshow("ROI", roi_cropped)
+                cv2.imwrite(face_image_path + "/" "face_" + str(crop_counter) + ".jpg", roi_cropped)
+                crop_counter += 1
 
         # Display the frame with the detected faces
         cv2.imshow('frame', frame)
-        # Stop the capture if q is pressed
+        # If q is pressed stop the capture
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
