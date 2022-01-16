@@ -11,24 +11,27 @@ def face_detection():
         # Capture each frame
         __, frame = capture.read()
 
-        # Storing the frame with the detected faces
+        # Store the frame with the detected faces
         result = face_detector.detect_faces(frame)
         if result:
             for person in result:
+                # Store the location of the box and key points
                 bounding_box = person['box']
-                keypoints = person['keypoints']
+                landmarks = person['keypoints']
 
+                # Create a bounding box around the face
                 cv2.rectangle(frame,
                               (bounding_box[0], bounding_box[1]),
                               (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]),
-                              (0, 155, 255),
+                              (204, 51, 255),
                               2)
 
-                cv2.circle(frame, (keypoints['left_eye']), 2, (0, 155, 255), 2)
-                cv2.circle(frame, (keypoints['right_eye']), 2, (0, 155, 255), 2)
-                cv2.circle(frame, (keypoints['nose']), 2, (0, 155, 255), 2)
-                cv2.circle(frame, (keypoints['mouth_left']), 2, (0, 155, 255), 2)
-                cv2.circle(frame, (keypoints['mouth_right']), 2, (0, 155, 255), 2)
+                # Create circles around facial landmarks
+                cv2.circle(frame, (landmarks['left_eye']), 2, (0, 255, 0), 2)
+                cv2.circle(frame, (landmarks['right_eye']), 2, (0, 255, 0), 2)
+                cv2.circle(frame, (landmarks['nose']), 2, (0, 255, 0), 2)
+                cv2.circle(frame, (landmarks['mouth_left']), 2, (0, 255, 0), 2)
+                cv2.circle(frame, (landmarks['mouth_right']), 2, (0, 255, 0), 2)
 
         # Display the frame with the detected faces
         cv2.imshow('frame', frame)
