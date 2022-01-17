@@ -5,7 +5,7 @@ import cv2
 face_detector = MTCNN()
 capture = cv2.VideoCapture(0)
 face_image_path = "C:/Users/Edwin/OneDrive - University of Greenwich/Year 3/Final Year " \
-                  "Project/Programming/Facial-Recognition/cropped_faces "
+                  "Project/Programming/Facial-Recognition/cropped_faces"
 
 
 def face_detection():
@@ -20,21 +20,7 @@ def face_detection():
             for person in result:
                 # Store the location of the box and key points
                 bounding_box = person['box']
-                # landmarks = person['keypoints']
-
-                # # Draw a bounding box around the face
-                # cv2.rectangle(frame,
-                #               (bounding_box[0], bounding_box[1]),
-                #               (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]),
-                #               (204, 51, 255),
-                #               2)
-                #
-                # # Draw circles around facial landmarks
-                # cv2.circle(frame, (landmarks['left_eye']), 2, (0, 255, 0), 2)
-                # cv2.circle(frame, (landmarks['right_eye']), 2, (0, 255, 0), 2)
-                # cv2.circle(frame, (landmarks['nose']), 2, (0, 255, 0), 2)
-                # cv2.circle(frame, (landmarks['mouth_left']), 2, (0, 255, 0), 2)
-                # cv2.circle(frame, (landmarks['mouth_right']), 2, (0, 255, 0), 2)
+                landmarks = person['keypoints']
 
                 # Slice and store the image to only include the ROI
                 roi_cropped = frame[int(bounding_box[1]):
@@ -46,6 +32,20 @@ def face_detection():
                 cv2.imshow("ROI", roi_cropped)
                 cv2.imwrite(face_image_path + "/" "face_" + str(crop_counter) + ".jpg", roi_cropped)
                 crop_counter += 1
+
+                # Draw a bounding box around the face
+                cv2.rectangle(frame,
+                              (bounding_box[0], bounding_box[1]),
+                              (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]),
+                              (204, 51, 255),
+                              2)
+
+                # Draw circles around facial landmarks
+                cv2.circle(frame, (landmarks['left_eye']), 2, (0, 255, 0), 2)
+                cv2.circle(frame, (landmarks['right_eye']), 2, (0, 255, 0), 2)
+                cv2.circle(frame, (landmarks['nose']), 2, (0, 255, 0), 2)
+                cv2.circle(frame, (landmarks['mouth_left']), 2, (0, 255, 0), 2)
+                cv2.circle(frame, (landmarks['mouth_right']), 2, (0, 255, 0), 2)
 
         # Display the frame with the detected faces
         cv2.imshow('frame', frame)
