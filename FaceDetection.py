@@ -28,10 +28,13 @@ def face_detection():
                                     int(bounding_box[0]):
                                     int(bounding_box[0] + bounding_box[2])]
 
-                # Display a window showing the cropped face and save to file
+                # Display a window showing the cropped face
                 cv2.imshow("ROI", roi_cropped)
-                cv2.imwrite(face_image_path + "/" "face_" + str(crop_counter) + ".jpg", roi_cropped)
-                crop_counter += 1
+
+                # if s is pressed then save the cropped ROI
+                if cv2.waitKey(1) & 0xFF == ord('s'):
+                    cv2.imwrite(face_image_path + "/" "face_" + str(crop_counter) + ".jpg", roi_cropped)
+                    crop_counter += 1
 
                 # Draw a bounding box around the face
                 cv2.rectangle(frame,
