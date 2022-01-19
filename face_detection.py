@@ -37,6 +37,7 @@ class FaceDetection:
                     if cv2.waitKey(1) & 0xFF == ord('s'):
                         cv2.imwrite(self.face_image_path + "/" "face_" + str(crop_counter) + ".jpg", roi_cropped)
                         crop_counter += 1
+                        print("ROI image captured")
 
                     # Draw a bounding box around the face
                     cv2.rectangle(frame,
