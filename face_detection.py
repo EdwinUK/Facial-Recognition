@@ -1,17 +1,24 @@
 from mtcnn import MTCNN
 import cv2
+import os
+import tensorflow as tf
+import uuid
+from face_recognition import FaceRecognition
+
+physical_devices = tf.config.experimental.list_physical_devices("GPU")
+print("Number of GPUs Available: ", len(physical_devices))
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 
 class FaceDetection:
-    # Initializing the following attributes: MTCNN, video capture and the image path
+    # Initializing the following attributes: MTCNN, video capture and paths
     def __init__(self):
         self.mtcnn = MTCNN()
         self.capture = cv2.VideoCapture(0)
-        self.face_image_path = "C:/Users/Edwin/OneDrive - University of Greenwich/Year 3/Final Year " \
-                               "Project/Programming/Facial-Recognition/cropped_faces"
+        self.root_path = os.path.dirname(os.path.abspath("face_detection.py"))
+        self.face_image_path = os.path.join(self.root_path, "cropped_faces")
 
     def face_detector(self):
-        crop_counter = 0
         while True:
             # Capture each frame
             __, frame = self.capture.read()
@@ -33,10 +40,10 @@ class FaceDetection:
                     # Display a window showing the cropped face
                     cv2.imshow("ROI", roi_cropped)
 
-                    # if s is pressed then save the cropped ROI
+                    # if s is pressed then resize the cropped ROI and save it locally
                     if cv2.waitKey(1) & 0xFF == ord('s'):
-                        cv2.imwrite(self.face_image_path + "/" "face_" + str(crop_counter) + ".jpg", roi_cropped)
-                        crop_counter += 1
+                        roi_cropped = cv2.resize(roi_cropped, (250, 250))
+                        cv2.imwrite(f"{self.face_image_path}/{uuid.uuid1()}.jpg", roi_cropped)
                         print("ROI image captured")
 
                     # Draw a bounding box around the face
@@ -68,6 +75,8 @@ class FaceDetection:
 def main():
     face_detection = FaceDetection()
     face_detection.face_detector()
+    # face_recognition = FaceRecognition()
+    # face_recognition.split_dataset()
 
 
 if __name__ == "__main__":
