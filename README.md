@@ -4,7 +4,7 @@ This facial recognition application is my final year project for university, it 
  ## Tasks
  - [x] Face detection using the MTCNN library.
  - [x] Function which crops the ROI and saves the image.
- - [ ] Implement the Siamese model for face recognition.
+ - [x] Implement the Siamese model for face recognition.
  - [ ] Integrate the face detection and face recognition modules.
  - [ ] Implement the spoof detection module.
  - [ ] Integrate the spoof detection with the other two modules.
