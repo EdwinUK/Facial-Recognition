@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 # Similarity calculation call
-def call(self, input_embedding, validation_embedding):
+def call(input_embedding, validation_embedding):
     return tf.math.abs(input_embedding - validation_embedding)
 
 
