@@ -3,6 +3,7 @@ import cv2
 import os
 import tensorflow as tf
 import uuid
+
 from face_recognition import FaceRecognition
 
 physical_devices = tf.config.experimental.list_physical_devices("GPU")
@@ -34,8 +35,8 @@ class FaceDetection:
                     # Slice and store the image to only include the ROI
                     roi_cropped = frame[int(bounding_box[1]):
                                         int(bounding_box[1] + bounding_box[3]),
-                                        int(bounding_box[0]):
-                                        int(bounding_box[0] + bounding_box[2])]
+                                  int(bounding_box[0]):
+                                  int(bounding_box[0] + bounding_box[2])]
 
                     # Display a window showing the cropped face
                     cv2.imshow("ROI", roi_cropped)
@@ -73,10 +74,10 @@ class FaceDetection:
 
 
 def main():
-    face_detection = FaceDetection()
-    face_detection.face_detector()
-    # face_recognition = FaceRecognition()
-    # face_recognition.split_dataset()
+    # face_detection = FaceDetection()
+    # face_detection.face_detector()
+    face_recognition = FaceRecognition()
+    face_recognition.siamese_model.summary()
 
 
 if __name__ == "__main__":
