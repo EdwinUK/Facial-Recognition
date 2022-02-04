@@ -35,17 +35,22 @@ class FaceDetection:
                     # Slice and store the image to only include the ROI
                     roi_cropped = frame[int(bounding_box[1]):
                                         int(bounding_box[1] + bounding_box[3]),
-                                  int(bounding_box[0]):
-                                  int(bounding_box[0] + bounding_box[2])]
-
-                    # Display a window showing the cropped face
-                    cv2.imshow("ROI", roi_cropped)
+                                        int(bounding_box[0]):
+                                        int(bounding_box[0] + bounding_box[2])]
 
                     # if s is pressed then resize the cropped ROI and save it locally
                     if cv2.waitKey(1) & 0xFF == ord('s'):
                         roi_cropped = cv2.resize(roi_cropped, (250, 250))
                         cv2.imwrite(f"{self.face_image_path}/{uuid.uuid1()}.jpg", roi_cropped)
                         print("ROI image captured")
+
+                    # if v is pressed then save the cropped roi and attempt verification
+                    # and if the 0.5 verification threshold is met then print that the user has been verified
+                    if cv2.waitKey(10) & 0xFF == ord('v'):
+                        cv2.imwrite(os.path.join("application_data", "input_image", "input_image.jpg"), roi_cropped)
+                        face_recognition = FaceRecognition()
+                        results, verified = face_recognition.verification(0.5, 0.5)
+                        print("You have been verified!" if verified else "Access denied!")
 
                     # Draw a bounding box around the face
                     cv2.rectangle(frame,
@@ -62,7 +67,7 @@ class FaceDetection:
                     cv2.circle(frame, (landmarks['mouth_right']), 2, (0, 255, 0), 2)
 
             # Display the frame with the detected faces
-            cv2.imshow('frame', frame)
+            cv2.imshow('Face Recognition', frame)
 
             # If q is pressed stop the capture
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -74,10 +79,8 @@ class FaceDetection:
 
 
 def main():
-    # face_detection = FaceDetection()
-    # face_detection.face_detector()
-    face_recognition = FaceRecognition()
-    face_recognition.siamese_model.summary()
+    face_detection = FaceDetection()
+    face_detection.face_detector()
 
 
 if __name__ == "__main__":
