@@ -1,87 +1,42 @@
-from mtcnn import MTCNN
-import cv2
 import os
+import numpy as np
 import tensorflow as tf
-import uuid
 
-from face_recognition import FaceRecognition
-
-physical_devices = tf.config.experimental.list_physical_devices("GPU")
-print("Number of GPUs Available: ", len(physical_devices))
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+from distance_layer import L1Distance
 
 
-class FaceDetection:
-    # Initializing the following attributes: MTCNN, video capture and paths
+# Preprocessing function to prepare data for the model
+def preprocess(file_path):
+    img_in_bytes = tf.io.read_file(file_path)
+    img = tf.io.decode_jpeg(img_in_bytes)
+    img = tf.image.resize(img, (100, 100))
+    img = img / 255.0
+    return img
+
+
+class FaceRecognition:
     def __init__(self):
-        self.mtcnn = MTCNN()
-        self.capture = cv2.VideoCapture(0)
-        self.root_path = os.path.dirname(os.path.abspath("face_detection.py"))
-        self.face_image_path = os.path.join(self.root_path, "cropped_faces")
+        self.siamese_model = \
+            tf.keras.models.load_model("siamesemodel.h5",
+                                       custom_objects={"L1Distance": L1Distance,
+                                                       "BinaryCrossentropy": tf.losses.BinaryCrossentropy})
 
-    def face_detector(self):
-        while True:
-            # Capture each frame
-            __, frame = self.capture.read()
+    def verification(self, detection_threshold, verification_threshold):
+        # Create results array and preprocess input and validation data
+        results = []
+        for image in os.listdir(os.path.join("application_data", "verification_images")):
+            input_image = preprocess(os.path.join("application_data", "input_image", "input_image.jpg"))
+            validation_image = preprocess(os.path.join("application_data", "verification_images", image))
 
-            # Store the frame with the detected faces
-            result = self.mtcnn.detect_faces(frame)
-            if result:
-                for person in result:
-                    # Store the location of the box and key points
-                    bounding_box = person['box']
-                    landmarks = person['keypoints']
+            # Make predictions on the data and append to the results array
+            result = self.siamese_model.predict(list(np.expand_dims([input_image, validation_image], axis=1)))
+            results.append(result)
 
-                    # Slice and store the image to only include the ROI
-                    roi_cropped = frame[int(bounding_box[1]):
-                                        int(bounding_box[1] + bounding_box[3]),
-                                        int(bounding_box[0]):
-                                        int(bounding_box[0] + bounding_box[2])]
+        # Detection threshold is the metric used to determine whether a prediction is considered positive
+        detection = np.sum(np.array(results) > detection_threshold)
 
-                    # if s is pressed then resize the cropped ROI and save it locally
-                    if cv2.waitKey(1) & 0xFF == ord('s'):
-                        roi_cropped = cv2.resize(roi_cropped, (250, 250))
-                        cv2.imwrite(f"{self.face_image_path}/{uuid.uuid1()}.jpg", roi_cropped)
-                        print("ROI image captured")
+        # Verification threshold is the amount of positive predictions divided by positive samples
+        verification = detection / len(os.listdir(os.path.join("application_data", "verification_images")))
+        verified = verification > verification_threshold
 
-                    # if v is pressed then save the cropped roi and attempt verification
-                    # and if the 0.5 verification threshold is met then print that the user has been verified
-                    if cv2.waitKey(10) & 0xFF == ord('v'):
-                        cv2.imwrite(os.path.join("application_data", "input_image", "input_image.jpg"), roi_cropped)
-                        face_recognition = FaceRecognition()
-                        results, verified = face_recognition.verification(0.5, 0.5)
-                        print("You have been verified!" if verified else "Access denied!")
-
-                    # Draw a bounding box around the face
-                    cv2.rectangle(frame,
-                                  (bounding_box[0], bounding_box[1]),
-                                  (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]),
-                                  (204, 51, 255),
-                                  2)
-
-                    # Draw circles around facial landmarks
-                    cv2.circle(frame, (landmarks['left_eye']), 2, (0, 255, 0), 2)
-                    cv2.circle(frame, (landmarks['right_eye']), 2, (0, 255, 0), 2)
-                    cv2.circle(frame, (landmarks['nose']), 2, (0, 255, 0), 2)
-                    cv2.circle(frame, (landmarks['mouth_left']), 2, (0, 255, 0), 2)
-                    cv2.circle(frame, (landmarks['mouth_right']), 2, (0, 255, 0), 2)
-
-            # Display the frame with the detected faces
-            cv2.imshow('Face Recognition', frame)
-
-            # If q is pressed stop the capture
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-        # Release the use of the capture and destroy the window
-        self.capture.release()
-        cv2.destroyAllWindows()
-
-
-def main():
-    face_detection = FaceDetection()
-    face_detection.face_detector()
-
-
-if __name__ == "__main__":
-    main()
+        return results, verified
