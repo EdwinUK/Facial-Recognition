@@ -58,7 +58,7 @@ class FaceDetection:
                                   (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]),
                                   (204, 51, 255),
                                   2)
-                    #Testing push
+
                     # Draw circles around facial landmarks
                     cv2.circle(frame, (landmarks['left_eye']), 2, (0, 255, 0), 2)
                     cv2.circle(frame, (landmarks['right_eye']), 2, (0, 255, 0), 2)
