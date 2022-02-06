@@ -38,7 +38,5 @@ class FaceRecognition:
         # Verification threshold is the amount of positive predictions divided by positive samples
         verification = detection / len(os.listdir(os.path.join("application_data", "verification_images")))
         verified = verification > verification_threshold
-        print(results)
-        print(verification)
 
-        return results, verified
+        return verified, verification

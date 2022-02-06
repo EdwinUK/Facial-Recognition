@@ -38,9 +38,9 @@ class FaceDetection:
                 # Create an instance of the face recognition class and call the verification function
                 # If the 0.5 verification threshold is met then print that the user has been verified
                 face_recognition = FaceRecognition()
-                results, verified = face_recognition.verification(0.5, 0.5)
+                verified, verification = face_recognition.verification(0.5, 0.5)
+                print(f"Verification Rate: {verification * 100}%")
                 print("You have been verified!" if verified else "Access denied!")
-
         # Release the use of the capture and destroy the window
         self.capture.release()
         cv2.destroyAllWindows()
