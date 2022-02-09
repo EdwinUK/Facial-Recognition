@@ -43,6 +43,7 @@ class FaceDetection:
                     # Call the spoof detector method which will detect whether the input is a spoof attack
                     spoof_detection = SpoofDetection()
                     spoof_result = spoof_detection.spoof_detector()
+                    print(spoof_result)
 
                     # If the spoof_result is 1 then it's real input, if it's 0 then it's a spoof attack
                     if spoof_result == 1:
@@ -54,12 +55,12 @@ class FaceDetection:
                         print(f"Verification Rate: {verification * 100}%")
                         print("You have been verified!" if verified else "Access denied!")
                     else:
-                        print("Spoof attack detected")
+                        print("Spoof attack detected, access denied!")
 
                 elif len(faces) > 1:
                     print("Too many faces are in the frame")
                 else:
-                    print("No face detected")
+                    print("No face detected in the frame")
         # Release the use of the capture and destroy the window
         self.capture.release()
         cv2.destroyAllWindows()
