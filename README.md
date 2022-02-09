@@ -12,5 +12,7 @@ https://drive.google.com/file/d/1CwUV9kcl9aG-trnKJCo3lNnfx0vCg-Uz/view?usp=shari
  - [x] Function which crops the ROI and saves the image.
  - [x] Implement the Siamese model for face recognition.
  - [x] Integrate the face detection and face recognition modules.
- - [ ] Implement the spoof detection module.
- - [ ] Integrate the spoof detection with the other two modules.
+ - [x] Implement the spoof detection module.
+ - [x] Integrate the spoof detection with the other two modules.
+ - [ ] Design a GUI using Kivy
+ - [ ] Port the application to android and test it on a smartphone
