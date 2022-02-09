@@ -6,7 +6,7 @@ from distance_layer import L1Distance
 
 
 # Preprocessing function to prepare data for the model
-def preprocess(file_path):
+def siamese_model_preprocess(file_path):
     img_in_bytes = tf.io.read_file(file_path)
     img = tf.io.decode_jpeg(img_in_bytes)
     img = tf.image.resize(img, (100, 100))
@@ -21,12 +21,12 @@ class FaceRecognition:
                                        custom_objects={"L1Distance": L1Distance,
                                                        "BinaryCrossentropy": tf.losses.BinaryCrossentropy})
 
-    def verification(self, detection_threshold, verification_threshold):
+    def face_verification(self, detection_threshold, verification_threshold):
         # Create results array and preprocess input and validation data
         results = []
         for image in os.listdir(os.path.join("application_data", "verification_images")):
-            input_image = preprocess(os.path.join("application_data", "input_image", "input_image.jpg"))
-            validation_image = preprocess(os.path.join("application_data", "verification_images", image))
+            input_image = siamese_model_preprocess(os.path.join("application_data", "input_image", "input_image.jpg"))
+            validation_image = siamese_model_preprocess(os.path.join("application_data", "verification_images", image))
 
             # Make predictions on the data and append to the results array
             result = self.siamese_model.predict(list(np.expand_dims([input_image, validation_image], axis=1)))
