@@ -14,7 +14,7 @@ class FaceDetection:
     def __init__(self):
         self.mtcnn = MTCNN()
         self.root_path = os.path.dirname(os.path.abspath("face_detection.py"))
-        self.input_image_path = os.path.join(self.root_path, "application_data", "input_image", "input_image.jpg")
+        self.input_image_path = os.path.join(self.root_path, "application_images", "input_image", "input_image.jpg")
 
     def face_detector(self):
         # Read the input image and detect all faces using MTCNN

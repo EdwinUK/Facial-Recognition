@@ -17,16 +17,16 @@ def siamese_model_preprocess(file_path):
 class FaceRecognition:
     def __init__(self):
         self.siamese_model = \
-            tf.keras.models.load_model("siamesemodel.h5",
+            tf.keras.models.load_model("cnn_models/siamesemodel.h5",
                                        custom_objects={"L1Distance": L1Distance,
                                                        "BinaryCrossentropy": tf.losses.BinaryCrossentropy})
 
     def face_verification(self, detection_threshold, verification_threshold):
         # Create results array and preprocess input and validation data
         results = []
-        for image in os.listdir(os.path.join("application_data", "verification_images")):
-            input_image = siamese_model_preprocess(os.path.join("application_data", "input_image", "input_image.jpg"))
-            validation_image = siamese_model_preprocess(os.path.join("application_data", "verification_images", image))
+        for image in os.listdir(os.path.join("application_images", "verification_images")):
+            input_image = siamese_model_preprocess(os.path.join("application_images", "input_image", "input_image.jpg"))
+            validation_image = siamese_model_preprocess(os.path.join("application_images", "verification_images", image))
 
             # Make predictions on the data and append to the results array
             result = self.siamese_model.predict(list(np.expand_dims([input_image, validation_image], axis=1)))
@@ -36,7 +36,7 @@ class FaceRecognition:
         detection = np.sum(np.array(results) > detection_threshold)
 
         # Verification threshold is the amount of positive predictions divided by positive samples
-        verification = detection / len(os.listdir(os.path.join("application_data", "verification_images")))
+        verification = detection / len(os.listdir(os.path.join("application_images", "verification_images")))
         verified = verification > verification_threshold
 
         return verified
