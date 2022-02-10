@@ -62,14 +62,14 @@ class MobileApp(App):
             # Call the spoof detector method which will detect whether the input is a spoof attack
             spoof_detection = SpoofDetection()
             spoof_result = spoof_detection.spoof_detector()
-
+            print(spoof_result)
             # If the spoof_result is 1 then it's real input, if it's 0 then it's a spoof attack
             if spoof_result == 1:
                 # Create an instance of the face recognition class and call the verification function
                 # If the 0.5 verification threshold is met then print that the user has been verified
                 face_recognition = FaceRecognition()
                 verified = face_recognition.face_verification(0.5, 0.5)
-                self.verified_status.text = "You have been verified!" if verified else "Access denied!"
+                self.verified_status.text = "You have been verified!" if verified else "You have not been recognised!"
 
             else:
                 self.verified_status.text = "Spoof attack detected, access denied!"

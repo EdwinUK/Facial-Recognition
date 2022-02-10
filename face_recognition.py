@@ -39,4 +39,4 @@ class FaceRecognition:
         verification = detection / len(os.listdir(os.path.join("application_data", "verification_images")))
         verified = verification > verification_threshold
 
-        return verified, verification
+        return verified
