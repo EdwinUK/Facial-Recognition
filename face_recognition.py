@@ -19,7 +19,8 @@ class FaceRecognition:
         self.siamese_model = \
             tf.keras.models.load_model("cnn_models/siamesemodel.h5",
                                        custom_objects={"L1Distance": L1Distance,
-                                                       "BinaryCrossentropy": tf.losses.BinaryCrossentropy})
+                                                       "BinaryCrossentropy": tf.losses.BinaryCrossentropy},
+                                       compile=False)
 
     def face_verification(self, detection_threshold, verification_threshold):
         # Create results array and preprocess input and validation data
@@ -37,6 +38,7 @@ class FaceRecognition:
 
         # Verification threshold is the amount of positive predictions divided by positive samples
         verification = detection / len(os.listdir(os.path.join("application_images", "verification_images")))
+        print(results)
         verified = verification > verification_threshold
 
         return verified

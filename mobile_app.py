@@ -9,6 +9,7 @@ from kivy.uix.image import Image
 from kivy.logger import Logger
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
+from kivy.core.window import Window
 
 from face_detection import FaceDetection
 from face_recognition import FaceRecognition
@@ -19,8 +20,10 @@ class MobileApp(App):
     # Calling the parent class constructor and creating some app widget attributes
     def __init__(self):
         super().__init__()
-        self.webcam = Image(size_hint=(1, .8))
-        self.button = Button(text="Verify!", on_press=self.verify_user, size_hint=(1, .1))
+        self.app_title = Label(text="Facial Recognition", size_hint=(1, .1), font_size='20sp', bold=True)
+        self.webcam = Image(size_hint=(1, .7))
+        self.button = Button(text="Verify!", on_press=self.verify_user, size_hint=(1, .1), color=[0, 0, 0, 1],
+                             background_color=[255, 255, 255, 1])
         self.verified_status = Label(text="Verification waiting to start!", size_hint=(1, .1))
         self.capture = cv2.VideoCapture(0)
 
@@ -28,9 +31,11 @@ class MobileApp(App):
     def build(self):
         # Creating a box layout and adding the widget attributes to it
         layout = BoxLayout(orientation="vertical")
+        layout.add_widget(self.app_title)
         layout.add_widget(self.webcam)
         layout.add_widget(self.verified_status)
         layout.add_widget(self.button)
+        Window.size = (250, 450)
 
         # Schedule the update_capture function to run continuously
         Clock.schedule_interval(self.update_capture, 1.0 / 33.0)
@@ -62,7 +67,7 @@ class MobileApp(App):
             # Call the spoof detector method which will detect whether the input is a spoof attack
             spoof_detection = SpoofDetection()
             spoof_result = spoof_detection.spoof_detector()
-            print(spoof_result)
+
             # If the spoof_result is 1 then it's real input, if it's 0 then it's a spoof attack
             if spoof_result == 1:
                 # Create an instance of the face recognition class and call the verification function
@@ -70,11 +75,13 @@ class MobileApp(App):
                 face_recognition = FaceRecognition()
                 verified = face_recognition.face_verification(0.5, 0.5)
                 self.verified_status.text = "You have been verified!" if verified else "You have not been recognised!"
-
+                self.verified_status.color = "green" if verified else "red"
             else:
-                self.verified_status.text = "Spoof attack detected, access denied!"
+                self.verified_status.text = "Spoof attack detected!"
+                self.verified_status.color = "red"
         else:
             self.verified_status.text = amount_of_faces
+            self.verified_status.color = "red"
 
 
 if __name__ == "__main__":
