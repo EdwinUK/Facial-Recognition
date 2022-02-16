@@ -1,4 +1,3 @@
-import cv2
 import os
 import tensorflow as tf
 from mtcnn import MTCNN
@@ -13,12 +12,9 @@ class FaceDetection:
     # Initializing the following attributes: MTCNN, video capture and paths
     def __init__(self):
         self.mtcnn = MTCNN()
-        self.root_path = os.path.dirname(os.path.abspath("face_detection.py"))
-        # self.input_image_path = os.path.join(self.root_path, "application_images", "input_image", "input_image.jpg")
 
     def face_detector(self, input_image):
         # Read the input image and detect all faces using MTCNN
-        # pixels = cv2.imread(self.input_image_path)
         faces = self.mtcnn.detect_faces(input_image)
 
         # Check how many faces are detected in the frame
