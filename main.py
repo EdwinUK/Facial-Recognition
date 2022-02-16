@@ -1,4 +1,5 @@
 import cv2
+import tensorflow as tf
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -13,6 +14,12 @@ from kivy.core.window import Window
 from face_detection import FaceDetection
 from face_recognition import FaceRecognition
 from spoof_detection import SpoofDetection
+
+
+def preprocess_image(image):
+    img = tf.convert_to_tensor(image, "uint8")
+    img = tf.image.resize(img, (224, 224))
+    return img
 
 
 class MobileApp(App):
@@ -59,20 +66,20 @@ class MobileApp(App):
         __, frame = self.capture.read()
         frame = frame[120:120 + 250, 200:200 + 250, :]
 
-        cv2.imwrite(face_detection.input_image_path, frame)
-        amount_of_faces = face_detection.face_detector()
+        amount_of_faces = face_detection.face_detector(frame)
 
         if amount_of_faces == 1:
+            input_image = preprocess_image(frame)
             # Call the spoof detector method which will detect whether the input is a spoof attack
             spoof_detection = SpoofDetection()
-            spoof_result = spoof_detection.spoof_detector()
+            spoof_result = spoof_detection.spoof_detector(input_image)
 
             # If the spoof_result is 1 then it's real input, if it's 0 then it's a spoof attack
             if spoof_result == 1:
                 # Create an instance of the face recognition class and call the verification function
                 # If the 0.5 verification threshold is met then print that the user has been verified
                 face_recognition = FaceRecognition()
-                verified = face_recognition.face_verification()
+                verified = face_recognition.face_verification(input_image)
                 self.verified_status.text = "You have been verified!" if verified == 1 else "You have not been " \
                                                                                             "recognised! "
                 self.verified_status.color = "green" if verified == 1 else "red"
