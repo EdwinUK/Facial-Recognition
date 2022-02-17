@@ -1,5 +1,7 @@
 import cv2
 import tensorflow as tf
+import numpy as np
+import cvzone
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -22,7 +24,7 @@ def preprocess_image(image):
     return img
 
 
-class MobileApp(App):
+class MyFaceApp(App):
     # Calling the parent class constructor and creating some app widget attributes
     def __init__(self):
         super().__init__()
@@ -41,7 +43,6 @@ class MobileApp(App):
         layout.add_widget(self.webcam)
         layout.add_widget(self.verified_status)
         layout.add_widget(self.button)
-        Window.size = (250, 450)
 
         # Schedule the update_capture function to run continuously
         Clock.schedule_interval(self.update_capture, 1.0 / 33.0)
@@ -50,13 +51,14 @@ class MobileApp(App):
 
     # Updating the webcam feed continuously
     def update_capture(self, *args):
-        # Capture each frame and set the frame size to 250x250
-        __, frame = self.capture.read()
-        frame = frame[120:120 + 250, 200:200 + 250, :]
+        # Capture each frame
+        __, original_frame = self.capture.read()
+        overlay = cv2.imread("face.png", cv2.IMREAD_UNCHANGED)
+        overlay = cvzone.overlayPNG(original_frame, overlay, [205, 125])
 
         # Flip the frame horizontal and convert the image to a texture
-        buf = cv2.flip(frame, 0).tobytes()
-        img_texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt="bgr")
+        buf = cv2.flip(overlay, 0).tobytes()
+        img_texture = Texture.create(size=(overlay.shape[1], overlay.shape[0]), colorfmt="bgr")
         img_texture.blit_buffer(buf, colorfmt="bgr", bufferfmt="ubyte")
         self.webcam.texture = img_texture
 
@@ -92,4 +94,4 @@ class MobileApp(App):
 
 
 if __name__ == "__main__":
-    MobileApp().run()
+    MyFaceApp().run()
