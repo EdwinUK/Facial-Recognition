@@ -17,7 +17,7 @@ class FaceDetection:
         # Read the input image and detect all faces using MTCNN
         faces = self.mtcnn.detect_faces(input_image)
 
-        # Check how many faces are detected in the frame
+        # Check how many faces are detected in the frame and return the appropriate response
         if len(faces) == 1:
             return 1
         elif len(faces) > 1:

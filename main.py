@@ -1,6 +1,5 @@
 import cv2
 import tensorflow as tf
-import numpy as np
 import cvzone
 
 from kivy.app import App
@@ -11,13 +10,13 @@ from kivy.uix.image import Image
 from kivy.logger import Logger
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
-from kivy.core.window import Window
 
 from face_detection import FaceDetection
 from face_recognition import FaceRecognition
 from spoof_detection import SpoofDetection
 
 
+# Preprocessing function to prepare data for the model
 def preprocess_image(image):
     img = tf.convert_to_tensor(image, "uint8")
     img = tf.image.resize(img, (224, 224))
@@ -25,14 +24,16 @@ def preprocess_image(image):
 
 
 class MyFaceApp(App):
-    # Calling the parent class constructor and creating some app widget attributes
+    # Calling the parent class constructor and creating some widget attributes
     def __init__(self):
         super().__init__()
-        self.app_title = Label(text="Facial Recognition", size_hint=(1, .1), font_size='20sp', bold=True)
+        self.app_title = Label(text="Facial Recognition", size_hint=(1, .1), font_size='24sp',
+                               font_name="Arial")
         self.webcam = Image(size_hint=(1, .7))
-        self.button = Button(text="Verify!", on_press=self.verify_user, size_hint=(1, .1), color=[0, 0, 0, 1],
-                             background_color=[255, 255, 255, 1])
-        self.verified_status = Label(text="Verification waiting to start!", size_hint=(1, .1))
+        self.button = Button(text="Verify!", on_press=self.verify_user, size_hint=(1, .1), font_size='22sp',
+                             color=[0, 0, 0, 1], background_color=[255, 255, 255, 1], font_name="Arial")
+        self.verified_status = Label(text="Verification waiting to start!", font_size='18sp', size_hint=(1, .1),
+                                     font_name="Arial")
         self.capture = cv2.VideoCapture(0)
 
     # Building the app
@@ -51,9 +52,9 @@ class MyFaceApp(App):
 
     # Updating the webcam feed continuously
     def update_capture(self, *args):
-        # Capture each frame
+        # Capture each frame and create an overlay border which will appear on the GUI
         __, original_frame = self.capture.read()
-        overlay = cv2.imread("face.png", cv2.IMREAD_UNCHANGED)
+        overlay = cv2.imread("face_border.png", cv2.IMREAD_UNCHANGED)
         overlay = cvzone.overlayPNG(original_frame, overlay, [205, 125])
 
         # Flip the frame horizontal and convert the image to a texture
