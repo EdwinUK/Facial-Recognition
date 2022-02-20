@@ -1,5 +1,4 @@
 import cv2
-import tensorflow as tf
 import cvzone
 
 from kivy.app import App
@@ -7,20 +6,12 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.image import Image
-from kivy.logger import Logger
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 
 from face_detection import FaceDetection
 from face_recognition import FaceRecognition
 from spoof_detection import SpoofDetection
-
-
-# Preprocessing function to prepare data for the model
-def preprocess_image(image):
-    img = tf.convert_to_tensor(image, "uint8")
-    img = tf.image.resize(img, (224, 224))
-    return img
 
 
 class MyFaceApp(App):
@@ -72,20 +63,19 @@ class MyFaceApp(App):
         amount_of_faces = face_detection.face_detector(frame)
 
         if amount_of_faces == 1:
-            input_image = preprocess_image(frame)
             # Call the spoof detector method which will detect whether the input is a spoof attack
             spoof_detection = SpoofDetection()
-            spoof_result = spoof_detection.spoof_detector(input_image)
+            spoof_result = spoof_detection.spoof_detector(frame)
 
             # If the spoof_result is 1 then it's real input, if it's 0 then it's a spoof attack
             if spoof_result == 1:
                 # Create an instance of the face recognition class and call the verification function
                 # If the 0.5 verification threshold is met then print that the user has been verified
                 face_recognition = FaceRecognition()
-                verified = face_recognition.face_verification(input_image)
-                self.verified_status.text = "You have been verified!" if verified == 1 else "You have not been " \
-                                                                                            "recognised! "
-                self.verified_status.color = "green" if verified == 1 else "red"
+                face_result = face_recognition.face_verification(frame, 0.5)
+                self.verified_status.text = f"Recognised as: {face_result}" if not face_result == "Unknown Face!" else \
+                    "Unknown Face!"
+                self.verified_status.color = "green" if not face_result == "Unknown Face!" else "red"
             else:
                 self.verified_status.text = "Spoof attack detected!"
                 self.verified_status.color = "red"

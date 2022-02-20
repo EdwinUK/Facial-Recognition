@@ -1,4 +1,3 @@
-import os
 import tensorflow as tf
 from mtcnn import MTCNN
 
