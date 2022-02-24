@@ -1,10 +1,5 @@
-import tensorflow as tf
 from mtcnn import MTCNN
-
-# Enable GPU memory growth for tensorflow
-physical_devices = tf.config.experimental.list_physical_devices("GPU")
-print("Number of GPUs Available: ", len(physical_devices))
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+import cv2
 
 
 class FaceDetection:
@@ -12,14 +7,15 @@ class FaceDetection:
     def __init__(self):
         self.mtcnn = MTCNN()
 
-    def face_detector(self, input_image):
+    def face_detector(self, capture):
         # Read the input image and detect all faces using MTCNN
-        faces = self.mtcnn.detect_faces(input_image)
-
+        __, frame = capture.read()
+        frame = frame[120:120 + 250, 200:200 + 250, :]
+        faces = self.mtcnn.detect_faces(frame)
         # Check how many faces are detected in the frame and return the appropriate response
         if len(faces) == 1:
-            return 1
+            return faces, frame
         elif len(faces) > 1:
-            return "Too many faces are in the frame"
+            return "Too many faces are in the frame", None
         else:
-            return "No face detected in the frame"
+            return "No face detected in the frame", None

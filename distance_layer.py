@@ -2,12 +2,9 @@ from tensorflow.keras import layers
 import tensorflow.keras.backend as K
 
 
-# Distance Layer
 class DistanceLayer(layers.Layer):
-    """
-    This layer is responsible for computing the distance
-    between the embeddings
-    """
+    # This layer is responsible for computing the distance
+    # between the embeddings
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

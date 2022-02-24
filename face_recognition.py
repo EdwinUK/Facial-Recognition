@@ -50,5 +50,5 @@ class FaceRecognition:
             results[db_names[num]] = prediction[num][0]
 
         highest_prob = max(results, key=results.get)
-
+        print(results)
         return highest_prob if results[highest_prob] > verification_threshold else "Unknown Face!"
