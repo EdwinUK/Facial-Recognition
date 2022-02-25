@@ -116,9 +116,9 @@ class MyFaceApp(App):
     # The function which calls of the main classes to perform face detection, spoof detection and face recognition
     def verify_user(self, *args):
         face_detection = FaceDetection()
-        amount_of_faces, frame = face_detection.face_detector(self.capture)
+        faces, frame = face_detection.face_detector(self.capture)
 
-        if len(amount_of_faces) == 1:
+        if len(faces) == 1:
             # Call the spoof detector method which will detect whether the input is a spoof attack
             spoof_detection = SpoofDetection()
             spoof_result = spoof_detection.spoof_detector(frame)
@@ -129,7 +129,7 @@ class MyFaceApp(App):
                 face_recognition = FaceRecognition()
 
                 # Call the verification function, if the 0.5 verification threshold is met then show user's name
-                face_result = face_recognition.face_verification(frame, 0.5)
+                face_result = face_recognition.face_verification(faces, frame, 0.5)
                 self.status.text = f"Recognised as: {face_result}" if not face_result == "Unknown Face!" else \
                     "Unknown Face!"
                 self.status.color = "green" if not face_result == "Unknown Face!" else "red"
@@ -137,7 +137,7 @@ class MyFaceApp(App):
                 self.status.text = "Spoof attack detected!"
                 self.status.color = "red"
         else:
-            self.status.text = amount_of_faces
+            self.status.text = faces
             self.status.color = "red"
 
     def register_user(self, *args):

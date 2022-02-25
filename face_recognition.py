@@ -2,7 +2,6 @@ import os
 import cv2
 import tensorflow as tf
 import numpy as np
-from mtcnn import MTCNN
 
 from distance_layer import DistanceLayer
 
@@ -18,21 +17,17 @@ class FaceRecognition:
     def __init__(self):
         self.siamese_model = tf.keras.models.load_model("cnn_models/siamese_model.h5",
                                                         custom_objects={"DistanceLayer": DistanceLayer})
-        self.detector = MTCNN()
 
-    def face_verification(self, input_image, verification_threshold):
+    def face_verification(self, faces, input_image, verification_threshold):
         db_names = []
         results = {}
         image_pairs = []
-        faces = self.detector.detect_faces(input_image)
 
-        for face in faces:
-            bounding_box = face['box']
-            input_image = input_image[int(bounding_box[1]):
-                                      int(bounding_box[1] + bounding_box[3]),
-                                      int(bounding_box[0]):
-                                      int(bounding_box[0] + bounding_box[2])]
-
+        bounding_box = faces[0]["box"]
+        input_image = input_image[int(bounding_box[1]):
+                                  int(bounding_box[1] + bounding_box[3]),
+                                  int(bounding_box[0]):
+                                  int(bounding_box[0] + bounding_box[2])]
         input_image = preprocess_image(input_image)
 
         for name in os.listdir("face_db"):
