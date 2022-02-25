@@ -27,7 +27,7 @@ tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 
 class MyFaceApp(App):
-    # Calling the parent class constructor and creating some widget attributes
+    # Calling the parent class constructor and creating some class attributes
     def __init__(self):
         super().__init__()
         self.capture = cv2.VideoCapture(0)
@@ -41,8 +41,9 @@ class MyFaceApp(App):
         self.temp_file = ""
         self.popup_instance = None
 
-    # Building the app
+    # Building the main app
     def build(self):
+        # Creating some widget attributes that have longer parameters
         app_title = Label(text="Facial Recognition", size_hint=(1, .1), font_size='24sp',
                           font_name="Arial")
 
@@ -54,7 +55,7 @@ class MyFaceApp(App):
                                  pos_hint={'x': .2, 'y': .2}, font_size='22sp',
                                  color=[0, 0, 0, 1], background_normal="button.png", font_name="Arial")
 
-        # Creating a box layout and adding the widget attributes to it
+        # Creating a box layout and more widgets, then adding the widgets to the layout
         main_screen = BoxLayout(orientation="vertical")
         main_screen.add_widget(app_title)
         main_screen.add_widget(self.webcam)
@@ -65,6 +66,7 @@ class MyFaceApp(App):
         main_screen.add_widget(register_button)
         main_screen.add_widget(Label(text="", size_hint=(1, .05)))
 
+        # Setting a fixed size for the window and making the background colour grey
         Window.size = (700, 650)
         Window.clearcolor = (30 / 255.0, 30 / 255.0, 30 / 255.0, 1)
 
@@ -73,6 +75,8 @@ class MyFaceApp(App):
 
         return main_screen
 
+    # Constructing the register process popup by creating and adding widgets to a box layout which is then used as
+    # content for the popup
     def build_popup(self, *args):
         if self.popup_instance is None:
 
@@ -118,6 +122,7 @@ class MyFaceApp(App):
         face_detection = FaceDetection()
         faces, frame = face_detection.face_detector(self.capture)
 
+        # If one face is detected then proceed with spoof detection otherwise set the status accordingly
         if len(faces) == 1:
             # Call the spoof detector method which will detect whether the input is a spoof attack
             spoof_detection = SpoofDetection()
@@ -128,7 +133,8 @@ class MyFaceApp(App):
                 # Create an instance of the face recognition class
                 face_recognition = FaceRecognition()
 
-                # Call the verification function, if the 0.5 verification threshold is met then show user's name
+                # Call the verification function passing the face coordinates and the frame
+                # if the 0.5 verification threshold is met then show the user's name else print unknown face
                 face_result = face_recognition.face_verification(faces, frame, 0.5)
                 self.status.text = f"Recognised as: {face_result}" if not face_result == "Unknown Face!" else \
                     "Unknown Face!"
@@ -140,25 +146,30 @@ class MyFaceApp(App):
             self.status.text = faces
             self.status.color = "red"
 
+    # This function is used for registering a new user's face
     def register_user(self, *args):
+        # Create and instance of the face detection class and call the face_detector method returning a frame and faces
         face_detection = FaceDetection()
-        amount_of_faces, frame = face_detection.face_detector(self.capture)
+        faces, frame = face_detection.face_detector(self.capture)
 
-        if len(amount_of_faces) == 1:
-            for face in amount_of_faces:
-                bounding_box = face['box']
-                frame = frame[int(bounding_box[1]):
-                              int(bounding_box[1] + bounding_box[3]),
-                              int(bounding_box[0]):
-                              int(bounding_box[0] + bounding_box[2])]
+        # If one face is detected then proceed with registration otherwise set the status accordingly
+        if len(faces) == 1:
+            # Crop and store ROI from the frame
+            bounding_box = faces[0]["box"]
+            frame = frame[int(bounding_box[1]):
+                          int(bounding_box[1] + bounding_box[3]),
+                          int(bounding_box[0]):
+                          int(bounding_box[0] + bounding_box[2])]
 
+            # Create a temporary filename and save this ROI under that temporary name whilst calling the popup
             self.temp_file = uuid.uuid1()
             cv2.imwrite(f"face_db/{self.temp_file}.jpg", frame)
             self.build_popup()
         else:
-            self.status.text = amount_of_faces
+            self.status.text = faces
             self.status.color = "red"
 
+    # This function will change the name of the temporary file to the new user's name which they submitted
     def successful_registration(self, *args):
         os.rename(f"face_db/{self.temp_file}.jpg", f"face_db/{self.new_users_name.text}.jpg")
         self.status.text = f"Your face has been successfully registered!"
@@ -166,6 +177,7 @@ class MyFaceApp(App):
         self.temp_file = ""
         self.popup_instance.dismiss()
 
+    # If the user does not complete registration by submitting a name for the file then the file will be deleted
     def unsuccessful_registration(self, *args):
         if self.temp_file != "":
             os.remove(f"face_db/{self.temp_file}.jpg")
