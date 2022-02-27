@@ -1,11 +1,11 @@
 import os
-
 import cv2
 import cvzone
-import tensorflow as tf
 import uuid
 
 from kivy.app import App
+from kivy.properties import BooleanProperty
+from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
@@ -13,17 +13,59 @@ from kivy.uix.image import Image
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
+from kivy.uix.recycleboxlayout import RecycleBoxLayout
+from kivy.uix.recycleview.layout import LayoutSelectionBehavior
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.textinput import TextInput
 from kivy.core.window import Window
+from kivy.uix.recycleview import RecycleView
 
 from face_detection import FaceDetection
 from face_recognition import FaceRecognition
 from spoof_detection import SpoofDetection
 
-# Enable GPU memory growth for tensorflow
-physical_devices = tf.config.experimental.list_physical_devices("GPU")
-print("Number of GPUs Available: ", len(physical_devices))
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# Global variable to pass the index of a name between classes when removing a user from the database
+global name_index
+
+
+# (Selectable Layout class from Kivy) Adds focus and selection behaviour to the layout
+class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
+    pass
+
+
+# (Selectable label class from Kivy) Adds selection support to label for the recycle view layout
+class SelectableLabel(RecycleDataViewBehavior, Label):
+    index = None
+    selected = BooleanProperty(False)
+    selectable = BooleanProperty(True)
+
+    # Catch and handle the view changes
+    def refresh_view_attrs(self, rv, index, data):
+        self.index = index
+        return super(SelectableLabel, self).refresh_view_attrs(
+            rv, index, data)
+
+    # Add selection on touch down
+    def on_touch_down(self, touch):
+        if super(SelectableLabel, self).on_touch_down(touch):
+            return True
+        if self.collide_point(*touch.pos) and self.selectable:
+            return self.parent.select_with_touch(self.index, touch)
+
+    # Respond to the selection of items in the view
+    def apply_selection(self, rv, index, is_selected):
+        self.selected = is_selected
+        if is_selected:
+            global name_index
+            name_index = index
+
+
+# (Recycle view class from Kivy) The init function calls the super constructor and data is where the database names
+# will be stored
+class RV(RecycleView):
+    def __init__(self, **kwargs):
+        super(RV, self).__init__(**kwargs)
+        self.data = [{"text": str(name).split(".")[0]} for name in os.listdir("face_db")]
 
 
 class MyFaceApp(App):
@@ -37,9 +79,10 @@ class MyFaceApp(App):
 
         self.new_users_name = TextInput(text="", size_hint=(1, .12), halign="center", font_name="Arial",
                                         cursor_color=[0, 0, 0, 1], multiline=False)
-
         self.temp_file = ""
-        self.popup_instance = None
+        self.register_popup_instance = None
+        self.remove_popup_instance = None
+        self.list_view = None
 
     # Building the main app
     def build(self):
@@ -55,6 +98,10 @@ class MyFaceApp(App):
                                  pos_hint={'x': .2, 'y': .2}, font_size='22sp',
                                  color=[0, 0, 0, 1], background_normal="button.png", font_name="Arial")
 
+        remove_button = Button(text="Remove an existing face!", on_press=self.build_remove_popup, size_hint=(.6, .1),
+                               pos_hint={'x': .2, 'y': .2}, font_size='22sp',
+                               color=[0, 0, 0, 1], background_normal="button.png", font_name="Arial")
+
         # Creating a box layout and more widgets, then adding the widgets to the layout
         main_screen = BoxLayout(orientation="vertical")
         main_screen.add_widget(app_title)
@@ -64,10 +111,12 @@ class MyFaceApp(App):
         main_screen.add_widget(verify_button)
         main_screen.add_widget(Label(text="", size_hint=(1, .025)))
         main_screen.add_widget(register_button)
+        main_screen.add_widget(Label(text="", size_hint=(1, .025)))
+        main_screen.add_widget(remove_button)
         main_screen.add_widget(Label(text="", size_hint=(1, .05)))
 
         # Setting a fixed size for the window and making the background colour grey
-        Window.size = (700, 650)
+        Window.size = (700, 675)
         Window.clearcolor = (30 / 255.0, 30 / 255.0, 30 / 255.0, 1)
 
         # Schedule the update_capture function to run continuously
@@ -77,8 +126,8 @@ class MyFaceApp(App):
 
     # Constructing the register process popup by creating and adding widgets to a box layout which is then used as
     # content for the popup
-    def build_popup(self, *args):
-        if self.popup_instance is None:
+    def build_register_popup(self, *args):
+        if self.register_popup_instance is None:
 
             popup_content = BoxLayout(orientation="vertical")
 
@@ -100,9 +149,35 @@ class MyFaceApp(App):
                                    on_dismiss=self.unsuccessful_registration)
             register_popup.open()
 
-            self.popup_instance = register_popup
+            self.register_popup_instance = register_popup
         else:
-            self.popup_instance.open()
+            self.register_popup_instance.open()
+
+    # Constructing the user remove process popup by creating and adding widgets to a box layout which is then used as
+    # content for the popup
+    def build_remove_popup(self, *args):
+        self.list_view = RV()
+
+        remove_popup_content = BoxLayout(orientation="vertical")
+
+        remove_popup_content.add_widget(Label(text="", size_hint=(1, .1)))
+
+        remove_popup_content.add_widget(self.list_view)
+
+        remove_popup_content.add_widget(Label(text="", size_hint=(1, .1)))
+
+        remove_popup_content.add_widget(Button(text="Remove user!", on_press=self.remove_user,
+                                               size_hint=(.5, .25), pos_hint={'x': .25, 'y': .2},
+                                               font_name="Arial", background_normal="button.png",
+                                               color=[0, 0, 0, 1]))
+
+        remove_popup_content.add_widget(Label(text="", size_hint=(1, .1)))
+
+        remove_face_popup = Popup(title='Face Removal Process', content=remove_popup_content,
+                                  size_hint=(.7, .5), title_size='18sp', title_font="Arial", title_align="center")
+        remove_face_popup.open()
+
+        self.remove_popup_instance = remove_face_popup
 
     # Updating the webcam feed continuously
     def update_capture(self, *args):
@@ -158,13 +233,13 @@ class MyFaceApp(App):
             bounding_box = faces[0]["box"]
             frame = frame[int(bounding_box[1]):
                           int(bounding_box[1] + bounding_box[3]),
-                          int(bounding_box[0]):
-                          int(bounding_box[0] + bounding_box[2])]
+                    int(bounding_box[0]):
+                    int(bounding_box[0] + bounding_box[2])]
 
             # Create a temporary filename and save this ROI under that temporary name whilst calling the popup
             self.temp_file = uuid.uuid1()
             cv2.imwrite(f"face_db/{self.temp_file}.jpg", frame)
-            self.build_popup()
+            self.build_register_popup()
         else:
             self.status.text = faces
             self.status.color = "red"
@@ -172,10 +247,10 @@ class MyFaceApp(App):
     # This function will change the name of the temporary file to the new user's name which they submitted
     def successful_registration(self, *args):
         os.rename(f"face_db/{self.temp_file}.jpg", f"face_db/{self.new_users_name.text}.jpg")
-        self.status.text = f"Your face has been successfully registered!"
+        self.status.text = f"A new face has been successfully registered!"
         self.status.color = "green"
         self.temp_file = ""
-        self.popup_instance.dismiss()
+        self.register_popup_instance.dismiss()
 
     # If the user does not complete registration by submitting a name for the file then the file will be deleted
     def unsuccessful_registration(self, *args):
@@ -184,6 +259,16 @@ class MyFaceApp(App):
             self.status.text = f"The face registration was not successfully completed!"
             self.status.color = "red"
             self.temp_file = ""
+
+    # When the function is called it will use the global variable index to find the name in the data variable
+    # then removing this user's face from the database and lastly refreshing the popup
+    def remove_user(self, *args):
+        file_name = f"{self.list_view.data[name_index]['text']}.jpg"
+        os.remove(f"face_db/{file_name}")
+        self.remove_popup_instance.dismiss()
+        self.build_remove_popup()
+        self.status.text = f"The user has been successfully removed from the database!"
+        self.status.color = "green"
 
 
 if __name__ == "__main__":

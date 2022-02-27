@@ -1,0 +1,19 @@
+<SelectableLabel>:
+    # Background color and shape of the label before and after selection
+    canvas.before:
+        Color:
+            rgba: (47 / 255.0, 167 / 255.0, 212 / 255.0, 1) if self.selected else (15 / 255.0, 15 / 255.0, 15 / 255.0, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+<RV>:
+    # Creating and customizing the recycle box layout
+    viewclass: 'SelectableLabel'
+    SelectableRecycleBoxLayout:
+        default_size: None, dp(36)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
+        multiselect: False
+        touch_multiselect: False

@@ -6,6 +6,7 @@ class DistanceLayer(layers.Layer):
     # This layer is responsible for computing the distance
     # between the embeddings
 
+    # Call the parent class constructor
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
