@@ -233,8 +233,8 @@ class MyFaceApp(App):
             bounding_box = faces[0]["box"]
             frame = frame[int(bounding_box[1]):
                           int(bounding_box[1] + bounding_box[3]),
-                    int(bounding_box[0]):
-                    int(bounding_box[0] + bounding_box[2])]
+                          int(bounding_box[0]):
+                          int(bounding_box[0] + bounding_box[2])]
 
             # Create a temporary filename and save this ROI under that temporary name whilst calling the popup
             self.temp_file = uuid.uuid1()
