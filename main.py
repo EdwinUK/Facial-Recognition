@@ -1,4 +1,5 @@
 import os
+import time
 import cv2
 import cvzone
 import uuid
@@ -74,7 +75,7 @@ class MyFaceApp(App):
         super().__init__()
         self.capture = cv2.VideoCapture(0)
         self.webcam = Image(size_hint=(1, .7))
-        self.status = Label(text="Verification or registration is ready to begin!", font_size='18sp',
+        self.status = Label(text="Verification or registration is ready to begin, ensure your head is in the frame!", font_size='18sp',
                             size_hint=(1, .1), font_name="Arial", color=[1, 1, 1, 1])
 
         self.new_users_name = TextInput(text="", size_hint=(1, .12), halign="center", font_name="Arial",
@@ -233,8 +234,8 @@ class MyFaceApp(App):
             bounding_box = faces[0]["box"]
             frame = frame[int(bounding_box[1]):
                           int(bounding_box[1] + bounding_box[3]),
-                          int(bounding_box[0]):
-                          int(bounding_box[0] + bounding_box[2])]
+                    int(bounding_box[0]):
+                    int(bounding_box[0] + bounding_box[2])]
 
             # Create a temporary filename and save this ROI under that temporary name whilst calling the popup
             self.temp_file = uuid.uuid1()
