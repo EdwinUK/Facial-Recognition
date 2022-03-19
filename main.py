@@ -1,5 +1,4 @@
 import os
-import time
 import cv2
 import cvzone
 import uuid
@@ -75,8 +74,8 @@ class MyFaceApp(App):
         super().__init__()
         self.capture = cv2.VideoCapture(0)
         self.webcam = Image(size_hint=(1, .7))
-        self.status = Label(text="Verification or registration is ready to begin, ensure your head is in the frame!", font_size='18sp',
-                            size_hint=(1, .1), font_name="Arial", color=[1, 1, 1, 1])
+        self.status = Label(text="Verification or registration is ready to begin, ensure your head is in the frame!",
+                            font_size='18sp', size_hint=(1, .1), font_name="Arial", color=[1, 1, 1, 1])
 
         self.new_users_name = TextInput(text="", size_hint=(1, .12), halign="center", font_name="Arial",
                                         cursor_color=[0, 0, 0, 1], multiline=False)
@@ -234,8 +233,8 @@ class MyFaceApp(App):
             bounding_box = faces[0]["box"]
             frame = frame[int(bounding_box[1]):
                           int(bounding_box[1] + bounding_box[3]),
-                    int(bounding_box[0]):
-                    int(bounding_box[0] + bounding_box[2])]
+                          int(bounding_box[0]):
+                          int(bounding_box[0] + bounding_box[2])]
 
             # Create a temporary filename and save this ROI under that temporary name whilst calling the popup
             self.temp_file = uuid.uuid1()
@@ -252,6 +251,7 @@ class MyFaceApp(App):
         self.status.color = "green"
         self.temp_file = ""
         self.register_popup_instance.dismiss()
+        self.new_users_name.text = ""
 
     # If the user does not complete registration by submitting a name for the file then the file will be deleted
     def unsuccessful_registration(self, *args):
@@ -260,6 +260,7 @@ class MyFaceApp(App):
             self.status.text = f"The face registration was not successfully completed!"
             self.status.color = "red"
             self.temp_file = ""
+            self.new_users_name.text = ""
 
     # When the function is called it will use the global variable index to find the name in the data variable
     # then removing this user's face from the database and lastly refreshing the popup
