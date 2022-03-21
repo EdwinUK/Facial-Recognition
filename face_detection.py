@@ -2,7 +2,7 @@ from mtcnn import MTCNN
 
 
 class FaceDetection:
-    # Initializing the following attributes: MTCNN, video capture and paths
+    # Initializing a MTCNN attribute
     def __init__(self):
         self.mtcnn = MTCNN()
 
