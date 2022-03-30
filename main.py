@@ -84,6 +84,10 @@ class MyFaceApp(App):
         self.remove_popup_instance = None
         self.list_view = None
 
+        self.name_taken_popup = Popup(title='Name Already Exists',
+                                      content=Label(text='The name entered already exists in the database!'),
+                                      size_hint=(0.5, 0.2), title_font="Arial", title_align="center")
+
     # Building the main app
     def build(self):
         # Creating some widget attributes that have longer parameters
@@ -131,7 +135,7 @@ class MyFaceApp(App):
 
             popup_content = BoxLayout(orientation="vertical")
 
-            popup_content.add_widget(Label(text="Enter your first and last name with a space in the middle",
+            popup_content.add_widget(Label(text="Enter your name, this will be used as the label for your face",
                                            size_hint=(1, .3), halign="center", font_name="Arial"))
 
             popup_content.add_widget(self.new_users_name)
@@ -246,12 +250,15 @@ class MyFaceApp(App):
 
     # This function will change the name of the temporary file to the new user's name which they submitted
     def successful_registration(self, *args):
-        os.rename(f"face_db/{self.temp_file}.jpg", f"face_db/{self.new_users_name.text}.jpg")
-        self.status.text = f"A new face has been successfully registered!"
-        self.status.color = "green"
-        self.temp_file = ""
-        self.register_popup_instance.dismiss()
-        self.new_users_name.text = ""
+        try:
+            os.rename(f"face_db/{self.temp_file}.jpg", f"face_db/{self.new_users_name.text}.jpg")
+            self.status.text = f"A new face has been successfully registered!"
+            self.status.color = "green"
+            self.temp_file = ""
+            self.register_popup_instance.dismiss()
+            self.new_users_name.text = ""
+        except FileExistsError:
+            self.name_taken_popup.open()
 
     # If the user does not complete registration by submitting a name for the file then the file will be deleted
     def unsuccessful_registration(self, *args):
