@@ -72,7 +72,7 @@ class MyFaceApp(App):
     # Calling the parent class constructor and creating some class attributes
     def __init__(self):
         super().__init__()
-        self.capture = cv2.VideoCapture(0)
+        self.capture = cv2.VideoCapture(1)
         self.webcam = Image(size_hint=(1, .7))
         self.status = Label(text="Verification or registration is ready to begin, ensure your head is in the frame!",
                             font_size='18sp', size_hint=(1, .1), font_name="Arial", color=[1, 1, 1, 1])
@@ -252,7 +252,7 @@ class MyFaceApp(App):
     def successful_registration(self, *args):
         try:
             os.rename(f"face_db/{self.temp_file}.jpg", f"face_db/{self.new_users_name.text}.jpg")
-            self.status.text = f"A new face has been successfully registered!"
+            self.status.text = f"{self.new_users_name.text} has been successfully registered!"
             self.status.color = "green"
             self.temp_file = ""
             self.register_popup_instance.dismiss()
@@ -272,11 +272,12 @@ class MyFaceApp(App):
     # When the function is called it will use the global variable index to find the name in the data variable
     # then removing this user's face from the database and lastly refreshing the popup
     def remove_user(self, *args):
-        file_name = f"{self.list_view.data[name_index]['text']}.jpg"
+        users_name = self.list_view.data[name_index]['text']
+        file_name = f"{users_name}.jpg"
         os.remove(f"face_db/{file_name}")
         self.remove_popup_instance.dismiss()
         self.build_remove_popup()
-        self.status.text = f"The user has been successfully removed from the database!"
+        self.status.text = f"{users_name} has been successfully removed from the database!"
         self.status.color = "green"
 
 
